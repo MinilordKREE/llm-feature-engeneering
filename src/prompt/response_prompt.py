@@ -5,7 +5,14 @@ It is worth investigating if the glucose level of '{Glucose}' mg/dL is common fo
 These characteristics could be compared with other hypothetical patients to identify trends or patterns. It's also worth noting the number of pregnancies '{Pregnancies}' the patient has had, as it can influence the risk of developing diabetes. Finally, comparing this data with other datasets can help identify trends or changes over time.
 ''')
 
+template_eucaly = ('''For a eucalyptus tree from {Abbrev} with a representative value of {Rep}, located in {Locality} (Map Reference: {Map_Ref}, Latitude: {Latitude}), at an altitude of {Altitude} meters, and receiving {Rainfall} mm of rainfall, several correlations or hypotheses can be explored.
 
+It is worth investigating if the altitude of '{Altitude}' meters is common for trees of similar profiles. The rainfall of '{Rainfall}' mm and the number of frosts '{Frosts}' could be compared with other eucalyptus trees from the same or different localities to determine common patterns. The year '{Year}' and species '{Sp}' might indicate specific environmental or genetic factors influencing the tree's growth and health.
+
+The tree's physical characteristics such as PMC number '{PMCno}', diameter at breast height (DBH) of '{DBH}' cm, height '{Ht}' meters, survival rate '{Surv}', vigor '{Vig}', internal resistance '{Ins_res}', stem form '{Stem_Fm}', crown form '{Crown_Fm}', and branch form '{Brnch_Fm}' can be analyzed to understand its overall health and adaptability.
+
+These characteristics could be compared with other eucalyptus trees to identify trends or patterns. Comparing this data with other datasets can help identify trends or changes over time.
+''')
 
 
 

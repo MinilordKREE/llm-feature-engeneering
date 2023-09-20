@@ -3,6 +3,8 @@ import pandas as pd
 from io import StringIO
 import openai
 import time
+from sklearn.preprocessing import LabelEncoder
+
 def arff_to_dataframe(file_path):
 
     with open(file_path, 'r') as f:
@@ -19,7 +21,16 @@ def arff_to_dataframe(file_path):
     data_lines = "\n".join(lines[data_start_index:])
     
     # Convert data lines to DataFrame
-    df = pd.read_csv(StringIO(data_lines), header=None, names=attributes)
+    df = pd.read_csv(StringIO(data_lines), header=None, names=attributes, na_values="?")
+    
+    # Replace missing values with -1
+    df.fillna(-1, inplace=True)
+    
+    # Convert categorical string data into numbers
+    for column in df.columns:
+        if df[column].dtype == 'object':  # Check if the column is of object type (string)
+            le = LabelEncoder()
+            df[column] = le.fit_transform(df[column])
     
     return df
 
