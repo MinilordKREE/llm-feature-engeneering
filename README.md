@@ -2,5 +2,6 @@
 
 ## Run evaluation model
 ```bash
-python src/main.py --df_path "/data/chenxi/llm-feature-engeneering/dataset/processed.cleveland.csv" --column_path "/data/chenxi/llm-feature-engeneering/src/model/responses/heart disease/analysisdnew.csv" --target 'num' --data_name "heart_disease"  --api_key ""
+python src/main.py --df_path "/data/chenxi/llm-feature-engeneering/dataset/circor.csv" --column_path "/data/chenxi/llm-feature-engeneering/src/model/responses/circor/sum.csv" --t
+arget 'Outcome' --data_name "circor  --api_key ""
 ```
