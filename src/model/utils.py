@@ -5,6 +5,7 @@ import openai
 import time
 from sklearn.preprocessing import LabelEncoder
 import csv
+import numpy as np
 
 def arff_to_dataframe(file_path):
 

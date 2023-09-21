@@ -13,6 +13,7 @@ from sklearn.model_selection import cross_val_score, KFold
 from .utils import *
 import openai
 import os 
+import json
 class ModelEvaluator:
     def __init__(self, data_name, df_path, column_path, target, methods, **kwargs):
         self.df = clean_csv(df_path, data_name).reset_index(drop=True)
@@ -22,6 +23,7 @@ class ModelEvaluator:
         self.target = target
         self.prepare_data()
         self.methods = methods if methods is not None else []
+        self.data_name =data_name
         
         
 
@@ -100,6 +102,8 @@ class ModelEvaluator:
         if not os.path.exists('log'):
             os.makedirs('log')
 
+        results = {}  # Dictionary to store mean and median values
+
         for metric in ['accuracy', 'roc_auc']:
             plt.figure(figsize=(15, 10))
 
@@ -118,6 +122,14 @@ class ModelEvaluator:
 
                 for name, scores in performance_metrics[metric].items():
                     print(f'Method: {method}, Model: {name}, {metric}: {scores.mean()} ± {scores.std()}')
+                    
+                    # Update the results dictionary
+                    if method not in results:
+                        results[method] = {}
+                    results[method][name] = {
+                        'mean': scores.mean(),
+                        'median': np.median(scores)
+                    }
 
                 x_ticks_positions = np.arange(len(models)) + i * 0.2
                 plt.boxplot([performance_metrics[metric][model_name] for model_name in models.keys()], positions=x_ticks_positions, widths=0.2, patch_artist=True,
@@ -133,5 +145,8 @@ class ModelEvaluator:
             plt.xticks(ticks=np.arange(len(models)), labels=models.keys())
 
             # Save the plot to the log directory
-            plt.savefig(f'log/{metric}_performance.png')
+            plt.savefig(f'log/{self.data_name}/{metric}_performance.png')
             plt.show()
+
+        with open(f'log/{self.data_name}/results.json', 'w') as json_file:
+            json.dump(results, json_file, indent=4)
