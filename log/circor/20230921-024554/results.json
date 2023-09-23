@@ -1,0 +1,30 @@
+{
+    "baseline": {
+        "Logistic Regression": {
+            "mean": 0.6967174248459403,
+            "median": 0.7007357102433502
+        },
+        "Random Forest": {
+            "mean": 0.6690718743307016,
+            "median": 0.6730901978831109
+        },
+        "Support Vector Machine": {
+            "mean": 0.6776929215684542,
+            "median": 0.670674183156926
+        }
+    },
+    "SelectK": {
+        "Logistic Regression": {
+            "mean": 0.7228074478173208,
+            "median": 0.7401556776556777
+        },
+        "Random Forest": {
+            "mean": 0.7079909070691718,
+            "median": 0.6983745421245421
+        },
+        "Support Vector Machine": {
+            "mean": 0.7000140128421763,
+            "median": 0.7014496088357111
+        }
+    }
+}

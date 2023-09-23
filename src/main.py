@@ -6,7 +6,7 @@ models = {
     'Random Forest': RandomForestClassifier(),
     'Support Vector Machine': SVC(probability=True),  # Enable probability estimates
 }
-methods = ['baseline', 'SelectK']
+methods = ['baseline', 'SelectK', 'PCA']
 def str2bool(v):
     if isinstance(v, bool):
        return v

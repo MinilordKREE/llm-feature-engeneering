@@ -14,9 +14,14 @@ from .utils import *
 import openai
 import os 
 import json
+import time
+    
 class ModelEvaluator:
     def __init__(self, data_name, df_path, column_path, target, methods, **kwargs):
-        self.df = clean_csv(df_path, data_name).reset_index(drop=True)
+        if data_name == r"circor|heart_disease":
+            self.df = clean_csv(df_path, data_name).reset_index(drop=True)
+        else:
+            self.df = arff_to_dataframe(df_path, data_name).reset_index(drop=True)
         self.column = pd.read_csv(column_path).reset_index(drop=True)
         self.original_columnlist = self.df.columns.drop(target).tolist()
         self.df['response'] = self.column.iloc[:, 0]
@@ -25,9 +30,6 @@ class ModelEvaluator:
         self.methods = methods if methods is not None else []
         self.data_name =data_name
         
-        
-
-
     @staticmethod
     def get_matching_cols(df, regex):
         r = re.compile(regex)
@@ -63,6 +65,39 @@ class ModelEvaluator:
         X_final = scaler.fit_transform(X)
         return X_final, y
 
+    def method_PCA(self):
+        X = self.df.drop(self.target, axis=1)
+        y = self.df[self.target]
+
+        X_cat = self.df[self.original_columnlist]
+        embed_cols = ModelEvaluator.get_embedding_cols(self.df)
+        X_text = self.df[embed_cols]
+
+        X_comb = pd.concat([X_cat, X_text], axis=1)
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X_comb)
+
+        best_n_components = None
+        best_score = float('-inf')
+        for n_components in range(1, 50):
+            pca = PCA(n_components=n_components)
+            X_pca = pca.fit_transform(X_scaled)
+
+            model = LogisticRegression()
+            score = cross_val_score(model, X_pca, y, cv=5, scoring='roc_auc').mean()
+
+            if score > best_score:
+                best_score = score
+                best_n_components = n_components
+
+        pca = PCA(n_components=best_n_components)
+        X_pca = pca.fit_transform(X_scaled)
+
+        X_final = pd.concat([X_cat, pd.DataFrame(X_pca)], axis=1)
+        X_final.columns = X_final.columns.astype(str)
+
+        return X_final, y
+
     def method_SelectK(self):
         y = self.df[self.target]
         X_cat = self.df[self.original_columnlist]
@@ -93,14 +128,18 @@ class ModelEvaluator:
 
         X_final = pd.concat([X_cat, pd.DataFrame(best_features)], axis=1)
         X_final.columns = X_final.columns.astype(str)
-        return X_final, y
-    
+        return X_final, y, best_k
+
     def evaluate_models(self, models, methods):
         colors = ['black', 'green', 'blue', 'red']
 
+        # Generate a unique timestamp
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        log_dir = f'log/{self.data_name}/{timestamp}'
+
         # Ensure the log directory exists
-        if not os.path.exists('log'):
-            os.makedirs('log')
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
         results = {}  # Dictionary to store mean and median values
 
@@ -113,7 +152,8 @@ class ModelEvaluator:
                 elif method == 'PCA':
                     X_final, y = self.method_PCA()
                 elif method == 'SelectK':
-                    X_final, y = self.method_SelectK()
+                    X_final, y, best_k = self.method_SelectK()
+                    print(best_k)
                 else:
                     raise ValueError(f"Unknown method: {method}")
 
@@ -144,9 +184,10 @@ class ModelEvaluator:
             plt.ylabel(metric)
             plt.xticks(ticks=np.arange(len(models)), labels=models.keys())
 
-            # Save the plot to the log directory
-            plt.savefig(f'log/{self.data_name}/{metric}_performance.png')
+            # Save the plot to the unique log directory
+            plt.savefig(f'{log_dir}/{metric}_performance.png')
             plt.show()
 
-        with open(f'log/{self.data_name}/results.json', 'w') as json_file:
+        # Save the results to a JSON file in the unique log directory
+        with open(f'{log_dir}/results.json', 'w') as json_file:
             json.dump(results, json_file, indent=4)
