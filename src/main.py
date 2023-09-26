@@ -4,7 +4,10 @@ from model import *
 models = {
     'Logistic Regression': LogisticRegression(),
     'Random Forest': RandomForestClassifier(),
-    'Support Vector Machine': SVC(probability=True),  # Enable probability estimates
+    'AdaBoost': AdaBoostClassifier(),
+    'Gradient Boosting': GradientBoostingClassifier(),
+    'Support Vector Machine': SVC(probability=True), 
+    'XGBoost': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
 }
 methods = ['baseline', 'SelectK', 'PCA']
 def str2bool(v):

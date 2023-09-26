@@ -1,0 +1,44 @@
+{
+    "baseline": {
+        "Logistic Regression": {
+            "performance": "0.6967 \u00b1 0.04",
+            "median": 0.7007357102433502
+        },
+        "Random Forest": {
+            "performance": "0.6712 \u00b1 0.02",
+            "median": 0.6705149971703452
+        },
+        "Support Vector Machine": {
+            "performance": "0.6777 \u00b1 0.02",
+            "median": 0.670674183156926
+        }
+    },
+    "SelectK": {
+        "Logistic Regression": {
+            "performance": "0.6855 \u00b1 0.03",
+            "median": 0.6795698924731183
+        },
+        "Random Forest": {
+            "performance": "0.6901 \u00b1 0.03",
+            "median": 0.6939139438564197
+        },
+        "Support Vector Machine": {
+            "performance": "0.6660 \u00b1 0.04",
+            "median": 0.6613469156762875
+        }
+    },
+    "PCA": {
+        "Logistic Regression": {
+            "performance": "0.6897 \u00b1 0.03",
+            "median": 0.6880723443223443
+        },
+        "Random Forest": {
+            "performance": "0.6824 \u00b1 0.02",
+            "median": 0.6877013345605154
+        },
+        "Support Vector Machine": {
+            "performance": "0.6936 \u00b1 0.04",
+            "median": 0.6981456043956045
+        }
+    }
+}

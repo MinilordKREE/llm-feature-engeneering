@@ -6,7 +6,9 @@ import matplotlib.patches as mpatches
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from xgboost import XGBClassifier
 from sklearn.svm import SVC
 from sklearn.feature_selection import SelectKBest, mutual_info_classif
 from sklearn.model_selection import cross_val_score, KFold
@@ -15,10 +17,13 @@ import openai
 import os 
 import json
 import time
+from sklearn.metrics import accuracy_score, roc_auc_score
+from Fine_tune import base
     
 class ModelEvaluator:
     def __init__(self, data_name, df_path, column_path, target, methods, **kwargs):
-        if data_name == r"circor|heart_disease":
+        self.data_name = data_name
+        if self.data_name == "circor" or self.data_name == "heart_disease":
             self.df = clean_csv(df_path, data_name).reset_index(drop=True)
         else:
             self.df = arff_to_dataframe(df_path, data_name).reset_index(drop=True)
@@ -51,7 +56,12 @@ class ModelEvaluator:
         return pd.DataFrame(col.to_list(), columns=col_names)
 
     def prepare_data(self):
-        self.df['text_vector'] = self.df['response'].apply(lambda x: self.get_embedding(x, model='text-embedding-ada-002'))
+        generator = base.EmbeddingGeneratorForNLPSequenceClassification.from_use_case(
+    use_case="NLP.SequenceClassification",
+    model_name="distilbert-base-uncased",
+    tokenizer_max_length=512
+)
+        self.df['text_vector'] = generator.generate_embeddings(self.df['response'])
         
         tab_vec_name = 'text_vector'
         prefix = "vec_"
@@ -130,64 +140,102 @@ class ModelEvaluator:
         X_final.columns = X_final.columns.astype(str)
         return X_final, y, best_k
 
-    def evaluate_models(self, models, methods):
-        colors = ['black', 'green', 'blue', 'red']
+    # def evaluate_models(self, models, methods):
+    #     colors = ['black', 'green', 'blue', 'red']
 
-        # Generate a unique timestamp
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        log_dir = f'log/{self.data_name}/{timestamp}'
+    #     # Generate a unique timestamp
+    #     timestamp = time.strftime("%Y%m%d-%H%M%S")
+    #     log_dir = f'log/{self.data_name}/{timestamp}'
 
-        # Ensure the log directory exists
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
+    #     # Ensure the log directory exists
+    #     if not os.path.exists(log_dir):
+    #         os.makedirs(log_dir)
 
-        results = {}  # Dictionary to store mean and median values
+    #     results = {}  # Dictionary to store mean and median values
 
-        for metric in ['accuracy', 'roc_auc']:
-            plt.figure(figsize=(15, 10))
+    #     for metric in ['accuracy', 'roc_auc']:
+    #         plt.figure(figsize=(15, 10))
 
-            for i, method in enumerate(methods):
-                if method == 'baseline':
-                    X_final, y = self.method_baseline()
-                elif method == 'PCA':
-                    X_final, y = self.method_PCA()
-                elif method == 'SelectK':
-                    X_final, y, best_k = self.method_SelectK()
-                    print(best_k)
-                else:
-                    raise ValueError(f"Unknown method: {method}")
+    #         for i, method in enumerate(methods):
+    #             if method == 'baseline':
+    #                 X_final, y = self.method_baseline()
+    #             elif method == 'PCA':
+    #                 X_final, y = self.method_PCA()
+    #             elif method == 'SelectK':
+    #                 X_final, y, best_k = self.method_SelectK()
+    #                 print(best_k)
+    #             else:
+    #                 raise ValueError(f"Unknown method: {method}")
 
-                kfold = KFold(n_splits=5, shuffle=True, random_state=42)
-                performance_metrics = {metric: {model_name: cross_val_score(model, X_final, y, cv=kfold, scoring=metric) for model_name, model in models.items()}}
+    #             kfold = KFold(n_splits=5, shuffle=True, random_state=42)
+    #             performance_metrics = {metric: {model_name: cross_val_score(model, X_final, y, cv=kfold, scoring=metric) for model_name, model in models.items()}}
 
-                for name, scores in performance_metrics[metric].items():
-                    print(f'Method: {method}, Model: {name}, {metric}: {scores.mean()} ± {scores.std()}')
+    #             for name, scores in performance_metrics[metric].items():
+    #                 print(f'Method: {method}, Model: {name}, {metric}: {scores.mean()} ± {scores.std()}')
                     
-                    # Update the results dictionary
-                    if method not in results:
-                        results[method] = {}
-                    results[method][name] = {
-                        'mean': scores.mean(),
-                        'median': np.median(scores)
-                    }
+    #                 # Update the results dictionary
+    #                 if method not in results:
+    #                     results[method] = {}
+    #                 results[method][name] = {
+    #                     'performance': f"{scores.mean():.4f} ± {scores.std():.2f}",  # Format the string as mean ± std
+    #                     'median': np.median(scores)
+    #                 }
 
-                x_ticks_positions = np.arange(len(models)) + i * 0.2
-                plt.boxplot([performance_metrics[metric][model_name] for model_name in models.keys()], positions=x_ticks_positions, widths=0.2, patch_artist=True,
-                            boxprops=dict(facecolor=colors[i], color=colors[i], alpha=0.6),
-                            capprops=dict(color=colors[i]),
-                            whiskerprops=dict(color=colors[i]),
-                            flierprops=dict(color=colors[i], markeredgecolor=colors[i]),
-                            medianprops=dict(color='black'))
+    #             x_ticks_positions = np.arange(len(models)) + i * 0.2
+    #             plt.boxplot([performance_metrics[metric][model_name] for model_name in models.keys()], positions=x_ticks_positions, widths=0.2, patch_artist=True,
+    #                         boxprops=dict(facecolor=colors[i], color=colors[i], alpha=0.6),
+    #                         capprops=dict(color=colors[i]),
+    #                         whiskerprops=dict(color=colors[i]),
+    #                         flierprops=dict(color=colors[i], markeredgecolor=colors[i]),
+    #                         medianprops=dict(color='black'))
 
-            plt.legend(handles=[mpatches.Patch(color=colors[i], label=methods[i]) for i in range(len(methods))], loc='upper right')
-            plt.title(f"Model performance ({metric})")
-            plt.ylabel(metric)
-            plt.xticks(ticks=np.arange(len(models)), labels=models.keys())
+    #         plt.legend(handles=[mpatches.Patch(color=colors[i], label=methods[i]) for i in range(len(methods))], loc='upper right')
+    #         plt.title(f"Model performance ({metric})")
+    #         plt.ylabel(metric)
+    #         plt.xticks(ticks=np.arange(len(models)), labels=models.keys())
 
-            # Save the plot to the unique log directory
-            plt.savefig(f'{log_dir}/{metric}_performance.png')
-            plt.show()
+    #         # Save the plot to the unique log directory
+    #         plt.savefig(f'{log_dir}/{metric}_performance.png')
+    #         plt.show()
 
-        # Save the results to a JSON file in the unique log directory
-        with open(f'{log_dir}/results.json', 'w') as json_file:
-            json.dump(results, json_file, indent=4)
+    #     # Save the results to a JSON file in the unique log directory
+    #     with open(f'{log_dir}/results.json', 'w') as json_file:
+    #         json.dump(results, json_file, indent=4)
+    def evaluate_models(self, train_df, test_df, models, methods):
+        method_results = {}
+        
+        for method in methods:
+            method_results[method] = {}
+
+            if method == 'baseline':
+                X_train, y_train, scaler = self.method_baseline(train_df)
+                X_test, y_test, _ = self.method_baseline(test_df, scaler)
+            elif method == 'PCA':
+                pca, best_n_components, scaler = self.method_PCA(train_df)
+                X_train, y_train = self.transform_with_PCA(pca, scaler, train_df)
+                X_test, y_test = self.transform_with_PCA(pca, scaler, test_df)
+            elif method == 'SelectK':
+                X_train, y_train, train_scaler, train_selector = self.method_SelectK(train_df)
+                X_test, y_test, _, _ = self.method_SelectK(test_df, train_scaler, train_selector)
+
+            for model_name, model in models.items():
+                model.fit(X_train, y_train)
+                y_pred = model.predict(X_test)
+
+                for metric in ['accuracy', 'roc_auc']:
+                    if metric == 'accuracy':
+                        score = accuracy_score(y_test, y_pred)
+                    elif metric == 'roc_auc':
+                        y_prob = model.predict_proba(X_test)[:, 1]  # assuming binary classification
+                        score = roc_auc_score(y_test, y_prob)
+
+                    if metric not in method_results[method]:
+                        method_results[method][metric] = {}
+                    if model_name not in method_results[method][metric]:
+                        method_results[method][metric][model_name] = []
+
+                    method_results[method][metric][model_name].append(score)
+
+                    print(f'Method: {method} | Model: {model_name} | {metric}: {score}')
+
+        return method_results

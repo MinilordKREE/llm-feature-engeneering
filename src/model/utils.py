@@ -99,9 +99,10 @@ def clean_csv(file_path, data_name=None):
         
         
         
-def get_embedding(text, model="text-embedding-ada-002"):
-    text = text.replace("\n", " ")
-    return openai.Embedding.create(input = [text], model=model)['data'][0]['embedding']
+# def get_embedding(text, model="text-embedding-ada-002"):
+#     text = text.replace("\n", " ")
+#     return openai.Embedding.create(input = [text], model=model)['data'][0]['embedding']
+
 
 def decoder_for_gpt3(input, max_length):
     while True:
