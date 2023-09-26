@@ -1,5 +1,13 @@
 import os
 import argparse
+import openai
+import time
+import pandas as pd
+import numpy as np
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+import datetime
+import json
 from model import *
 models = {
     'Logistic Regression': LogisticRegression(),
@@ -10,6 +18,9 @@ models = {
     'XGBoost': XGBClassifier(use_label_encoder=False, eval_metric='logloss'),
 }
 methods = ['baseline', 'SelectK', 'PCA']
+colors = ['yellow', 'red', 'blue', 'red', 'cyan', 'magenta', 'yellow']  # Added more colors for potential expansion
+metrics_list = ['accuracy', 'roc_auc']
+seeds = [0, 1, 2, 3, 4]
 def str2bool(v):
     if isinstance(v, bool):
        return v
@@ -41,7 +52,7 @@ def config():
 
 def main(args):
     evaluator = ModelEvaluator(**args)
-    evaluator.evaluate_models(models=models,methods=methods)
+    evaluator.run(models=models,methods=methods,colors=colors,metrics_list=metrics_list,seeds=seeds)
     return
 
 if __name__ == '__main__':
