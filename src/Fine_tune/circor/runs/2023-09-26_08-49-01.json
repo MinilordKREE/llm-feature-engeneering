@@ -1,0 +1,80 @@
+{
+    "baseline": {
+        "Logistic Regression": {
+            "performance": "0.7191 \u00b1 0.03",
+            "median": 0.7190513568064589
+        },
+        "Random Forest": {
+            "performance": "0.6535 \u00b1 0.01",
+            "median": 0.653452243958573
+        },
+        "AdaBoost": {
+            "performance": "0.6658 \u00b1 0.04",
+            "median": 0.6658443597219107
+        },
+        "Gradient Boosting": {
+            "performance": "0.6739 \u00b1 0.03",
+            "median": 0.6738521836506158
+        },
+        "Support Vector Machine": {
+            "performance": "0.7344 \u00b1 0.05",
+            "median": 0.7344344904815231
+        },
+        "XGBoost": {
+            "performance": "0.6831 \u00b1 0.02",
+            "median": 0.6830567391791882
+        }
+    },
+    "SelectK": {
+        "Logistic Regression": {
+            "performance": "0.9186 \u00b1 0.01",
+            "median": 0.9186421173762946
+        },
+        "Random Forest": {
+            "performance": "0.9074 \u00b1 0.01",
+            "median": 0.9073700716845878
+        },
+        "AdaBoost": {
+            "performance": "0.9150 \u00b1 0.02",
+            "median": 0.9150425627240143
+        },
+        "Gradient Boosting": {
+            "performance": "0.9169 \u00b1 0.02",
+            "median": 0.9169466845878136
+        },
+        "Support Vector Machine": {
+            "performance": "0.8957 \u00b1 0.02",
+            "median": 0.8957446808510637
+        },
+        "XGBoost": {
+            "performance": "0.9002 \u00b1 0.02",
+            "median": 0.9002016129032258
+        }
+    },
+    "PCA": {
+        "Logistic Regression": {
+            "performance": "0.8765 \u00b1 0.02",
+            "median": 0.8764560931899641
+        },
+        "Random Forest": {
+            "performance": "0.8723 \u00b1 0.02",
+            "median": 0.8722844344904814
+        },
+        "AdaBoost": {
+            "performance": "0.8664 \u00b1 0.03",
+            "median": 0.8664053751399776
+        },
+        "Gradient Boosting": {
+            "performance": "0.8787 \u00b1 0.01",
+            "median": 0.8787111622554661
+        },
+        "Support Vector Machine": {
+            "performance": "0.8691 \u00b1 0.03",
+            "median": 0.8690929451287793
+        },
+        "XGBoost": {
+            "performance": "0.8645 \u00b1 0.02",
+            "median": 0.8644713261648745
+        }
+    }
+}
