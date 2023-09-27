@@ -33,7 +33,6 @@ class ModelEvaluator:
         self.original_columnlist = self.df.columns.drop(target).tolist()
         self.df['response'] = self.column.iloc[:, 0]
         self.target = target
-        self.prepare_data()
         self.methods = methods if methods is not None else []
         self.data_name =data_name
         
@@ -57,35 +56,32 @@ class ModelEvaluator:
         col_names = [prefix + str(i) for i in range(n_cols)]
         return pd.DataFrame(col.to_list(), columns=col_names)
 
-    def prepare_data(self):
-        generator = base.EmbeddingGeneratorForNLPSequenceClassification.from_use_case(
-    use_case="NLP.SequenceClassification",
-    model_name="distilbert-base-uncased",
-    tokenizer_max_length=512
-)
-        self.df['text_vector'] = generator.generate_embeddings(self.df['response'])
+    def method_baseline(self, df, scaler=None):
+        X = df[self.original_columnlist]
+        y = df[self.target]
+        if scaler is None:
+            scaler = StandardScaler()
+            X_final = scaler.fit_transform(X)
+        else:
+            X_final = scaler.transform(X)
         
-        tab_vec_name = 'text_vector'
-        prefix = "vec_"
-        exploded = self.explode(self.df[tab_vec_name], prefix)
-        self.df = self.df.loc[:, exploded.columns] = exploded
-        return self.df
+        return X_final, y, scaler
 
-    def method_baseline(self):
-        X = self.df[self.original_columnlist]
-        y = self.df[self.target]
-        scaler = StandardScaler()
-        X_final = scaler.fit_transform(X)
-        return X_final, y
 
-    def method_PCA(self):
-        X = self.df.drop(self.target, axis=1)
-        y = self.df[self.target]
+    def fit_PCA(self,df):
+        def explode(col, prefix):
+            n_cols = len(col[0])
+            col_names = [prefix + str(i) for i in range(n_cols)]
+            return pd.DataFrame(col.to_list(), columns=col_names)
 
-        X_cat = self.df[self.original_columnlist]
-        embed_cols = ModelEvaluator.get_embedding_cols(self.df)
-        X_text = self.df[embed_cols]
+        # Explode text_vector
+        exploded = explode(df['text_vector'], 'vec_')
+        df.loc[:, exploded.columns] = exploded
 
+        y = df[self.target]
+        X_cat = df[self.original_columnlist]
+        embed_cols = ModelEvaluator.get_embedding_cols(df)
+        X_text = df[embed_cols]
         X_comb = pd.concat([X_cat, X_text], axis=1)
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X_comb)
@@ -104,44 +100,66 @@ class ModelEvaluator:
                 best_n_components = n_components
 
         pca = PCA(n_components=best_n_components)
-        X_pca = pca.fit_transform(X_scaled)
+        pca.fit(X_scaled)
+        return pca, best_n_components, scaler
 
-        X_final = pd.concat([X_cat, pd.DataFrame(X_pca)], axis=1)
-        X_final.columns = X_final.columns.astype(str)
+    def transform_with_PCA(self, pca, scaler, df):
+        def explode(col, prefix):
+            n_cols = len(col[0])
+            col_names = [prefix + str(i) for i in range(n_cols)]
+            return pd.DataFrame(col.to_list(), columns=col_names)
+
+        # Explode text_vector
+        exploded = explode(df['text_vector'], 'vec_')
+        df.loc[:, exploded.columns] = exploded
+
+        y = df[self.target]
+        X_cat = df[self.original_columnlist]
+        embed_cols = ModelEvaluator.get_embedding_cols(df)
+        X_text = df[embed_cols]
+        X_comb = pd.concat([X_cat, X_text], axis=1)
+        X_scaled = scaler.transform(X_comb)
+
+        X_pca = pca.transform(X_scaled)
+        X_final = pd.DataFrame(X_pca)
+        X_final.columns = [f'PC{i+1}' for i in range(X_final.shape[1])]
 
         return X_final, y
 
-    def method_SelectK(self):
-        y = self.df[self.target]
-        X_cat = self.df[self.original_columnlist]
-        embed_cols = ModelEvaluator.get_embedding_cols(self.df)
-        X_text = self.df[embed_cols]
+    def method_SelectK(self,df, scaler=None, selector=None):
+        def explode(col, prefix):
+            n_cols = len(col[0])
+            col_names = [prefix + str(i) for i in range(n_cols)]
+            return pd.DataFrame(col.to_list(), columns=col_names)
+
+        # Explode text_vector
+        exploded = explode(df['text_vector'], 'vec_')
+        df.loc[:, exploded.columns] = exploded
+
+        y = df[self.target]
+        X_cat = df[self.original_columnlist]
+        embed_cols = ModelEvaluator.get_embedding_cols(df)
+        X_text = df[embed_cols]
         X_comb = pd.concat([X_cat, X_text], axis=1)
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X_comb)
-        
-        possible_k_values = list(range(1, 50))
-        
-        best_score = -np.inf
-        best_k = None
-        best_features = None
 
-        model = SVC(probability=True)
+        # Scale the data
+        if scaler is None:
+            scaler = StandardScaler()
+            X_scaled = scaler.fit_transform(X_comb)
+        else:
+            X_scaled = scaler.transform(X_comb)
 
-        for k in possible_k_values:
-            selector = SelectKBest(mutual_info_classif, k=k)
+        # Feature selection
+        if selector is None:
+            selector = SelectKBest(mutual_info_classif, k=20)
             X_selected = selector.fit_transform(X_scaled, y)
+        else:
+            X_selected = selector.transform(X_scaled)
 
-            score = cross_val_score(model, X_selected, y, cv=5, scoring='roc_auc').mean()            
-
-            if score > best_score:
-                best_score = score
-                best_k = k
-                best_features = X_selected
-
-        X_final = pd.concat([X_cat, pd.DataFrame(best_features)], axis=1)
+        X_final = pd.concat([X_cat, pd.DataFrame(X_selected)], axis=1)
         X_final.columns = X_final.columns.astype(str)
-        return X_final, y, best_k
+
+        return X_final, y, scaler, selector
 
 
     def evaluate_models(self, train_df, test_df, models, methods):
@@ -154,7 +172,7 @@ class ModelEvaluator:
                 X_train, y_train, scaler = self.method_baseline(train_df)
                 X_test, y_test, _ = self.method_baseline(test_df, scaler)
             elif method == 'PCA':
-                pca, best_n_components, scaler = self.method_PCA(train_df)
+                pca, best_n_components, scaler = self.fit_PCA(train_df)
                 X_train, y_train = self.transform_with_PCA(pca, scaler, train_df)
                 X_test, y_test = self.transform_with_PCA(pca, scaler, test_df)
             elif method == 'SelectK':
@@ -211,15 +229,23 @@ class ModelEvaluator:
             output_json[method] = {}
             for model_name in models.keys():
                 scores = [all_results[seed][method]['roc_auc'][model_name][0] for seed in seeds]
+                
+                # Calculate median, mean, and standard deviation
                 median_score = np.median(scores)
+                mean_score = np.mean(scores)
                 std_score = np.std(scores)
-                performance_str = f"{median_score:.4f} ± {std_score:.2f}"
+                
+                # Create performance strings for both mean and median
+                mean_performance_str = f"{mean_score:.4f} ± {std_score:.2f}"
+                median_performance_str = f"{median_score:.4f} ± {std_score:.2f}"
                 
                 output_json[method][model_name] = {
-                    "performance": performance_str,
-                    "median": median_score
+                    "mean_performance": mean_performance_str,
+                    "median_performance": median_performance_str,
+                    "mean": mean_score,
+                    "median": median_score,
+                    "std": std_score
                 }
-
         # Save the JSON structure to a file
         current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         file_path = f"/data/chenxi/llm-feature-engeneering/log/{data_name}/new/{current_time}.json"

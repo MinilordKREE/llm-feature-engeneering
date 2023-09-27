@@ -52,7 +52,7 @@ def config():
 
 def main(args):
     evaluator = ModelEvaluator(**args)
-    evaluator.run(models=models,methods=methods,colors=colors,metrics_list=metrics_list,seeds=seeds)
+    evaluator.run(models=models,methods=methods,colors=colors,metrics_list=metrics_list,seeds=seeds,data_name=args['data_name'])
     return
 
 if __name__ == '__main__':

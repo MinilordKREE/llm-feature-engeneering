@@ -8,35 +8,32 @@ import csv
 import numpy as np
 
 def arff_to_dataframe(file_path, data_name=None):
-    if data_name == "diabetes":
-        with open(file_path, 'r') as f:
-            lines = f.readlines()
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    
+    # Extract attribute names
+    attributes = []
+    for line in lines:
+        if line.startswith("@attribute"):
+            attributes.append(line.split()[1])
+    
+    # Extract data
+    data_start_index = lines.index("@data\n") + 1
+    data_lines = "\n".join(lines[data_start_index:])
+    
+    # Convert data lines to DataFrame
+    df = pd.read_csv(StringIO(data_lines), header=None, names=attributes, na_values="?")
+    
+    # Replace missing values with -1
+    df.fillna(-1, inplace=True)
+    
+    # Convert categorical string data into numbers
+    for column in df.columns:
+        if df[column].dtype == 'object':  # Check if the column is of object type (string)
+            le = LabelEncoder()
+            df[column] = le.fit_transform(df[column])
         
-        # Extract attribute names
-        attributes = []
-        for line in lines:
-            if line.startswith("@attribute"):
-                attributes.append(line.split()[1])
-        
-        # Extract data
-        data_start_index = lines.index("@data\n") + 1
-        data_lines = "\n".join(lines[data_start_index:])
-        
-        # Convert data lines to DataFrame
-        df = pd.read_csv(StringIO(data_lines), header=None, names=attributes, na_values="?")
-        
-        # Replace missing values with -1
-        df.fillna(-1, inplace=True)
-        
-        # Convert categorical string data into numbers
-        for column in df.columns:
-            if df[column].dtype == 'object':  # Check if the column is of object type (string)
-                le = LabelEncoder()
-                df[column] = le.fit_transform(df[column])
-        
-        return df
-    else:
-        return
+    return df
 
 def clean_csv(file_path, data_name=None):
     df = pd.read_csv(file_path)
