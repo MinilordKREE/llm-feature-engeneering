@@ -1,0 +1,134 @@
+{
+    "baseline": {
+        "Logistic Regression": {
+            "mean_performance": "0.7108 \u00b1 0.03",
+            "median_performance": "0.7273 \u00b1 0.03",
+            "mean": 0.7107909361551826,
+            "median": 0.7272932161370296,
+            "std": 0.028829042231689198
+        },
+        "Random Forest": {
+            "mean_performance": "0.6626 \u00b1 0.02",
+            "median_performance": "0.6642 \u00b1 0.02",
+            "mean": 0.6625602374229626,
+            "median": 0.6641657334826429,
+            "std": 0.015092282487882542
+        },
+        "AdaBoost": {
+            "mean_performance": "0.7073 \u00b1 0.04",
+            "median_performance": "0.6963 \u00b1 0.04",
+            "mean": 0.7072642115721045,
+            "median": 0.6963045912653976,
+            "std": 0.04226906789878111
+        },
+        "Gradient Boosting": {
+            "mean_performance": "0.6997 \u00b1 0.03",
+            "median_performance": "0.6922 \u00b1 0.03",
+            "mean": 0.699709739114137,
+            "median": 0.6922324510932105,
+            "std": 0.025273039240622026
+        },
+        "Support Vector Machine": {
+            "mean_performance": "0.6985 \u00b1 0.05",
+            "median_performance": "0.7344 \u00b1 0.05",
+            "mean": 0.6984800333727831,
+            "median": 0.7343784994400897,
+            "std": 0.05367239765262326
+        },
+        "XGBoost": {
+            "mean_performance": "0.6807 \u00b1 0.02",
+            "median_performance": "0.6948 \u00b1 0.02",
+            "mean": 0.6806751355378123,
+            "median": 0.6947640966628308,
+            "std": 0.021673930558493683
+        }
+    },
+    "SelectK": {
+        "Logistic Regression": {
+            "mean_performance": "0.9242 \u00b1 0.01",
+            "median_performance": "0.9222 \u00b1 0.01",
+            "mean": 0.9242310991642894,
+            "median": 0.9221724524076148,
+            "std": 0.007795930652688575
+        },
+        "Random Forest": {
+            "mean_performance": "0.9325 \u00b1 0.01",
+            "median_performance": "0.9263 \u00b1 0.01",
+            "mean": 0.9324785484155723,
+            "median": 0.9262945914844649,
+            "std": 0.013799294215958147
+        },
+        "AdaBoost": {
+            "mean_performance": "0.9066 \u00b1 0.01",
+            "median_performance": "0.9054 \u00b1 0.01",
+            "mean": 0.9065511500797245,
+            "median": 0.9054311310190368,
+            "std": 0.013337785756055008
+        },
+        "Gradient Boosting": {
+            "mean_performance": "0.9186 \u00b1 0.01",
+            "median_performance": "0.9157 \u00b1 0.01",
+            "mean": 0.9186394101705849,
+            "median": 0.9156501726121979,
+            "std": 0.008522392792791232
+        },
+        "Support Vector Machine": {
+            "mean_performance": "0.9243 \u00b1 0.01",
+            "median_performance": "0.9183 \u00b1 0.01",
+            "mean": 0.9243361254441894,
+            "median": 0.9182530795072789,
+            "std": 0.012059852938199393
+        },
+        "XGBoost": {
+            "mean_performance": "0.9139 \u00b1 0.01",
+            "median_performance": "0.9200 \u00b1 0.01",
+            "mean": 0.9139472428257017,
+            "median": 0.9200447928331467,
+            "std": 0.013905945726808885
+        }
+    },
+    "PCA": {
+        "Logistic Regression": {
+            "mean_performance": "0.9177 \u00b1 0.00",
+            "median_performance": "0.9199 \u00b1 0.00",
+            "mean": 0.9177175418004234,
+            "median": 0.91993281075028,
+            "std": 0.0033353741064824144
+        },
+        "Random Forest": {
+            "mean_performance": "0.8911 \u00b1 0.02",
+            "median_performance": "0.8911 \u00b1 0.02",
+            "mean": 0.8910645545827087,
+            "median": 0.8911392405063292,
+            "std": 0.01678964832590539
+        },
+        "AdaBoost": {
+            "mean_performance": "0.9079 \u00b1 0.01",
+            "median_performance": "0.9094 \u00b1 0.01",
+            "mean": 0.90791403747116,
+            "median": 0.9094064949608062,
+            "std": 0.011164140407888275
+        },
+        "Gradient Boosting": {
+            "mean_performance": "0.9079 \u00b1 0.01",
+            "median_performance": "0.9072 \u00b1 0.01",
+            "mean": 0.9078725517733063,
+            "median": 0.9072008113590264,
+            "std": 0.00976734574184164
+        },
+        "Support Vector Machine": {
+            "mean_performance": "0.9080 \u00b1 0.02",
+            "median_performance": "0.9106 \u00b1 0.02",
+            "mean": 0.9079664072120038,
+            "median": 0.9105868814729573,
+            "std": 0.016238465514308444
+        },
+        "XGBoost": {
+            "mean_performance": "0.9043 \u00b1 0.01",
+            "median_performance": "0.9055 \u00b1 0.01",
+            "mean": 0.9042674331472377,
+            "median": 0.9054541356772595,
+            "std": 0.007743385190478381
+        }
+    }
+}

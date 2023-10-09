@@ -41,7 +41,7 @@ class BaseEmbeddingGenerator(ABC):
             number = ''.join([i for i in self.model_name if i.isdigit()])
 
             if base_model_name == "fine_tuned_model_circor":
-                self.__model = AutoModel.from_pretrained(f"/data/chenxi/llm-feature-engeneering/src/Fine_tune/circor/model/{number}/checkpoint-960", **kwargs).to(self.device)
+                self.__model = AutoModel.from_pretrained(f"/data/chenxi/llm-feature-engeneering/src/Fine_tune/circor/model/{number}/checkpoint-2280", **kwargs).to(self.device)
             elif base_model_name == "fine_tuned_model_heart_disease":
                 self.__model = AutoModel.from_pretrained(f"/data/chenxi/llm-feature-engeneering/src/Fine_tune/heart_disease/model/{number}/checkpoint-300", **kwargs).to(self.device)
             elif base_model_name == "fine_tuned_model_diabetes":
